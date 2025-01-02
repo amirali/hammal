@@ -4,24 +4,21 @@ from hammal import Hammal, RequestContext
 
 
 def logging_middleware(context: RequestContext) -> bool:
-    print(
-        f"{context['method']} request for {context['path']} with body: {context['body']}"
-    )
+    print(f"{context.method} request for {context.path} with body: {context.body}")
     return True
 
 
-# Example route handlers
 def hello_handler(context: RequestContext) -> None:
-    context["response"]["body"] = json.dumps({"message": "Hello, World!"})
+    context.response.body = json.dumps({"message": "Hello, World!"})
 
 
 def greet_handler(context: RequestContext) -> None:
-    name = context["path_params"].get("name", "Guest")
-    context["response"]["body"] = json.dumps({"message": f"Hello, {name}!"})
+    name = context.path_params.get("name", "Guest")
+    context.response.body = json.dumps({"message": f"Hello, {name}!"})
 
 
 def echo_handler(context: RequestContext) -> None:
-    context["response"]["body"] = json.dumps({"received": context["body"]})
+    context.response.body = json.dumps({"received": context.body})
 
 
 router = Hammal()

@@ -1,11 +1,33 @@
 import json
 import socket
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional, Tuple
 from urllib.parse import parse_qs
 
 RequestContext = Dict[str, Any]
 Middleware = Callable[[RequestContext], bool]
 RouteHandler = Callable[[RequestContext], None]
+
+Headers = Dict[str, str]
+Body = Optional[str]
+
+
+@dataclass
+class ResponseContext:
+    status: int = 200
+    headers: Headers = field(default_factory=dict)
+    body: Body = None
+
+
+@dataclass
+class RequestContext:
+    method: str
+    path: str
+    headers: Headers = field(default_factory=dict)
+    body: Body = None
+    path_params: Optional[Dict[str, str]] = None
+    response: ResponseContext = field(default_factory=ResponseContext)
+
 
 http_status_codes = {
     # 1xx Informational
@@ -120,11 +142,11 @@ class Hammal(object):
         return None, {}
 
     @staticmethod
-    def parse_request(request_data: str) -> Tuple[str, str, Dict[str, str], str]:
+    def parse_request(request_data: str) -> Tuple[str, str, Headers, Body]:
         lines = request_data.split("\r\n")
         request_line = lines[0]
         method, path, _ = request_line.split(" ")
-        headers: Dict[str, str] = {}
+        headers: Headers = {}
 
         i = 1
         while i < len(lines) and lines[i]:
@@ -136,10 +158,10 @@ class Hammal(object):
         return method, path, headers, body
 
     @staticmethod
-    def build_response(response: Dict[str, Any]) -> bytes:
-        status: int = response["status"]
-        body: str = response["body"]
-        headers: Dict[str, str] = response["headers"]
+    def build_response(response: ResponseContext) -> bytes:
+        status: int = response.status
+        body: str = response.body
+        headers: Headers = response.headers
         reason: str = http_status_codes.get(status, "Internal Server Error")
 
         response_text = f"HTTP/1.1 {status} {reason}\r\n"
@@ -153,31 +175,22 @@ class Hammal(object):
         method, path, headers, body = self.parse_request(request_data)
 
         path_template, path_params = self.match_route(method, path)
-        context: RequestContext = {
-            "method": method,
-            "path": path,
-            "headers": headers,
-            "body": body,
-            "path_params": path_params,
-            "response": {
-                "status": 200,
-                "headers": {"Content-Type": "application/json"},
-                "body": "",
-            },
-        }
+        context: RequestContext = RequestContext(
+            method, path, headers, body, path_params
+        )
 
         for middleware in self.middlewares:
             if not middleware(context):
-                return self.build_response(context["response"])
+                return self.build_response(context.response)
 
         if path_template:
             handler = self.routes[method][path_template]
             handler(context)
         else:
-            context["response"]["status"] = 404
-            context["response"]["body"] = json.dumps({"error": "Not Found"})
+            context.response.status = 404
+            context.response.body = json.dumps({"error": "Not Found"})
 
-        return self.build_response(context["response"])
+        return self.build_response(context.response)
 
     def start(self, host=None, port=None) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
