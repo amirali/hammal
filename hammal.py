@@ -164,6 +164,9 @@ class Hammal(object):
         headers: Headers = response.headers
         reason: str = http_status_codes.get(status, "Internal Server Error")
 
+        if not headers.get("Content-Type".lower()):
+            headers["Content-Type"] = "application/json"
+
         response_text = f"HTTP/1.1 {status} {reason}\r\n"
         for header_name, header_value in headers.items():
             response_text += f"{header_name}: {header_value}\r\n"
