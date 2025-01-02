@@ -114,6 +114,21 @@ class Hammal(object):
             self.routes[method] = {}
         self.routes[method][path] = handler
 
+    def get(self, path: str, handler: RouteHandler) -> None:
+        self.add("get", path, handler)
+
+    def post(self, path: str, handler: RouteHandler) -> None:
+        self.add("post", path, handler)
+
+    def put(self, path: str, handler: RouteHandler) -> None:
+        self.add("put", path, handler)
+
+    def patch(self, path: str, handler: RouteHandler) -> None:
+        self.add("patch", path, handler)
+
+    def delete(self, path: str, handler: RouteHandler) -> None:
+        self.add("delete", path, handler)
+
     def use(self, middleware: Middleware) -> None:
         self.middlewares.append(middleware)
 

@@ -24,7 +24,7 @@ def echo_handler(context: RequestContext) -> None:
 router = Hammal()
 router.use(logging_middleware)
 router.add("GET", "/", hello_handler)
-router.add("GET", "/greet/:name", greet_handler)
+router.get("/greet/:name", greet_handler)
 router.add("POST", "/echo", echo_handler)
 
 router.start()
