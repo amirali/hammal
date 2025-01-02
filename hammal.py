@@ -221,7 +221,7 @@ class Hammal(object):
             loop_condition = lambda: (
                 not self.thread_stop_event.is_set()
                 if self.thread_stop_event
-                else lambda: True
+                else True
             )
             while loop_condition():
                 try:
