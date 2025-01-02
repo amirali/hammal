@@ -1,7 +1,31 @@
 [project]
 name = "hammal"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight HTTP router library providing bare minimum routing functionality, designed for easy embedding within other applications."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = []
+authors = [
+  {name = "Amirali Esfandiari", email = "amiralinull@gmail.com"},
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.urls]
+Homepage = "https://github.com/amirali/hammal"
+Documentation = "https://github.com/amirali/hammal"
+Repository = "http://github.com/amirali/hammal.git"
+Issues = "https://github.com/amirali/hammal/issues"
+
+[tool.setuptools]
+license-files = []
