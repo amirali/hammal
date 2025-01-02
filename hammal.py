@@ -1,5 +1,6 @@
 import json
 import socket
+import threading
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Optional, Tuple
 from urllib.parse import parse_qs
@@ -107,6 +108,8 @@ class Hammal(object):
         self.port = port
         self.routes: Dict[str, Dict[str, RouteHandler]] = {}
         self.middlewares: list[Middleware] = []
+        self.thread: Optional[threading.Thread] = None
+        self.thread_stop_event: Optional[threading.Event] = None
 
     def add(self, method: str, path: str, handler: RouteHandler) -> None:
         method = method.upper()
@@ -210,12 +213,17 @@ class Hammal(object):
 
         return self.build_response(context.response)
 
-    def start(self, host=None, port=None) -> None:
+    def start(self, host: str = None, port: int = None) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
             server_socket.bind((host or self.host, port or self.port))
             server_socket.listen(5)
 
-            while True:
+            loop_condition = lambda: (
+                not self.thread_stop_event.is_set()
+                if self.thread_stop_event
+                else lambda: True
+            )
+            while loop_condition():
                 client_socket, client_address = server_socket.accept()
                 with client_socket:
                     request_data = client_socket.recv(1024).decode("utf-8")
@@ -224,3 +232,16 @@ class Hammal(object):
 
                     response = self.handle_request(request_data)
                     client_socket.sendall(response)
+
+    def start_async(self, host: str = None, port: int = None) -> None:
+        self.thread = threading.Thread(target=(self.start), args=(host, port))
+        self.thread_stop_event = threading.Event()
+        self.thread.start()
+
+    def stop_async(self):
+        # FIXME: Fix the last request call to end the process
+        # while loop_condition():
+        #    client_socket, client_address = server_socket.accept() <-----
+        #    with client_socket:
+        self.thread_stop_event.set()
+        self.thread.join()
