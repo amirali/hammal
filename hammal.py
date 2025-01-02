@@ -224,7 +224,11 @@ class Hammal(object):
                 else lambda: True
             )
             while loop_condition():
-                client_socket, client_address = server_socket.accept()
+                try:
+                    server_socket.settimeout(1.0)
+                    client_socket, client_address = server_socket.accept()
+                except socket.timeout:
+                    continue
                 with client_socket:
                     request_data = client_socket.recv(1024).decode("utf-8")
                     if not request_data:
@@ -234,14 +238,18 @@ class Hammal(object):
                     client_socket.sendall(response)
 
     def start_async(self, host: str = None, port: int = None) -> None:
-        self.thread = threading.Thread(target=(self.start), args=(host, port))
+        if self.thread and self.thread.is_alive():
+            raise RuntimeError("Server is already running.")
+
+        self.thread = threading.Thread(
+            target=(self.start), args=(host, port), daemon=True
+        )
         self.thread_stop_event = threading.Event()
         self.thread.start()
 
     def stop_async(self):
-        # FIXME: Fix the last request call to end the process
-        # while loop_condition():
-        #    client_socket, client_address = server_socket.accept() <-----
-        #    with client_socket:
+        if not self.thread or not self.thread.is_alive():
+            raise RuntimeError("Server is not running.")
+
         self.thread_stop_event.set()
         self.thread.join()
