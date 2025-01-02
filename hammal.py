@@ -17,7 +17,7 @@ Body = Optional[str]
 class ResponseContext:
     status: int = 200
     headers: Headers = field(default_factory=dict)
-    body: Body = None
+    body: Body = ""
 
 
 @dataclass
