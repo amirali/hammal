@@ -178,7 +178,7 @@ class Hammal(object):
     @staticmethod
     def build_response(response: ResponseContext) -> bytes:
         status: int = response.status
-        body: str = response.body
+        body: Body = response.body or ""
         headers: Headers = response.headers
         reason: str = http_status_codes.get(status, "Internal Server Error")
 
@@ -219,9 +219,7 @@ class Hammal(object):
             server_socket.listen(5)
 
             loop_condition = lambda: (
-                not self.thread_stop_event.is_set()
-                if self.thread_stop_event
-                else True
+                not self.thread_stop_event.is_set() if self.thread_stop_event else True
             )
             while loop_condition():
                 try:
