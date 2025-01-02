@@ -1,7 +1,7 @@
 # Hammal
 [![PyPI - Version](https://img.shields.io/pypi/v/hammal?logo=pypi&logoColor=%23df8e1d&label=PyPI&color=%23df8e1d)](https://pypi.org/project/hammal/)
 
-Hammal is a fast, minimalist Python web framework inspired by [Echo](https://github.com/labstack/echo). It is designed to be simple and easy to embed within other applications, providing the bare minimum router functionality.
+Hammal is a fast, minimalist Python web framework inspired by [Echo](https://github.com/labstack/echo). It is designed to be simple and easy to embed within other applications, providing the bare minimum routing functionality.
 
 ## Installation
 
